@@ -3,6 +3,7 @@ from django.utils import timezone
 
 
 class Pokemon(models.Model):
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     image = models.ImageField(null=True, blank=True)
 
@@ -15,7 +16,7 @@ class PokemonEntity(models.Model):
     lat = models.FloatField()
     lon = models.FloatField()
     appeared_at = models.DateTimeField(default=timezone.now)
-    disappeared_at = models.DateTimeField(blank=True, null=True)
+    disappeared_at = models.DateTimeField(default=timezone.now)
     level = models.IntegerField(blank=True, null=True)
     health = models.IntegerField(blank=True, null=True)
     strength = models.IntegerField(blank=True, null=True)
