@@ -4,12 +4,14 @@ from django.utils import timezone
 
 class Pokemon(models.Model):
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200)
+    title_ru = models.CharField(max_length=200)
+    title_en = models.CharField(max_length=200, null=True, blank=True)
+    title_jp = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.title_ru
 
 
 class PokemonEntity(models.Model):
@@ -25,4 +27,4 @@ class PokemonEntity(models.Model):
     stamina = models.IntegerField(blank=True, null=True)
         
     def __str__(self):
-        return self.pokemon.title
+        return self.pokemon.title_ru
