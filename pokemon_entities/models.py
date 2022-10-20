@@ -5,6 +5,7 @@ from django.utils import timezone
 class Pokemon(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
@@ -22,3 +23,6 @@ class PokemonEntity(models.Model):
     strength = models.IntegerField(blank=True, null=True)
     defence = models.IntegerField(blank=True, null=True)
     stamina = models.IntegerField(blank=True, null=True)
+        
+    def __str__(self):
+        return self.pokemon.title
