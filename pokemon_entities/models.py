@@ -1,10 +1,8 @@
-from tabnanny import verbose
 from django.db import models
 from django.utils import timezone
 
 
 class Pokemon(models.Model):
-    id = models.AutoField(primary_key=True)
     title_ru = models.CharField("Название на русском языке", max_length=200)
     title_en = models.CharField("Название на английском языке", max_length=200, null=True, blank=True)
     title_jp = models.CharField("Название на японском языке", max_length=200, null=True, blank=True)
