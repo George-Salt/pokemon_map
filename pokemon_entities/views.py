@@ -1,9 +1,6 @@
 import folium
-import json
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseNotFound
-from django.shortcuts import render
+from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django.utils.timezone import localtime
 from .models import Pokemon, PokemonEntity
 
@@ -46,7 +43,7 @@ def show_all_pokemons(request):
     pokemons_on_page = []
     for pokemon in pokemons_objects:
         pokemons_on_page.append({
-            'pokemon_id': pokemon.id,
+            'pokemon_id': pokemon.pk,
             'img_url': request.build_absolute_uri(pokemon.image.url),
             'title_ru': pokemon.title_ru,
         })
@@ -58,22 +55,17 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemons_objects = Pokemon.objects.all()
-    pokemons_entities = PokemonEntity.objects.all()
-    active_pokemons_entities = pokemons_entities.filter(
+    requested_pokemon = get_object_or_404(Pokemon, id=pokemon_id)
+    requested_pokemon_entities = get_list_or_404(
+        PokemonEntity,
         appeared_at__lt=localtime(),
-        disappeared_at__gt=localtime()
+        disappeared_at__gt=localtime(),
+        pokemon=pokemon_id
     )
-
-    try:
-        requested_pokemon = pokemons_objects.get(id=pokemon_id)
-        requested_pokemon_entities = active_pokemons_entities.filter(pokemon=pokemon_id)
-    except ObjectDoesNotExist:
-        return '<h1>Такой покемон не найден</h1>'
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     pokemon_specs = {
-        'pokemon_id': requested_pokemon.id,
+        'pokemon_id': requested_pokemon.pk,
         'entities': [],
         'img_url': request.build_absolute_uri(requested_pokemon.image.url),
         'title_ru': requested_pokemon.title_ru,
@@ -82,10 +74,10 @@ def show_pokemon(request, pokemon_id):
         'description': requested_pokemon.description
     }
 
-    if requested_pokemon.previous_evolution:
+    if requested_pokemon.previous_evolutions:
         pokemon_specs['previous_evolution'] = {
             'title_ru': requested_pokemon.previous_evolutions.title_ru,
-            'pokemon_id': requested_pokemon.previous_evolutions.id,
+            'pokemon_id': requested_pokemon.previous_evolutions.pk,
             'img_url': request.build_absolute_uri(
                 requested_pokemon.previous_evolutions.image.url
             )
@@ -95,7 +87,7 @@ def show_pokemon(request, pokemon_id):
         for evolution in next_evolutions:
             pokemon_specs['next_evolution'] = {
                 'title_ru': evolution.title_ru,
-                'pokemon_id': evolution.id,
+                'pokemon_id': evolution.pk,
                 'img_url': request.build_absolute_uri(evolution.image.url)
             }
 
