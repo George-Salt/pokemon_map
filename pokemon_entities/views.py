@@ -26,7 +26,7 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 def show_all_pokemons(request):
     local_time = localtime()
-    active_pokemons_entities = PokemonEntity.objects.all().filter(
+    active_pokemons_entities = PokemonEntity.objects.filter(
         appeared_at__lt=local_time,
         disappeared_at__gt=local_time
     )
@@ -83,7 +83,7 @@ def show_pokemon(request, pokemon_id):
             )
         }
 
-    next_evolution = requested_pokemon.next_evolutions.all().first()
+    next_evolution = requested_pokemon.next_evolutions.first()
     if next_evolution:
         pokemon_specs["next_evolution"] = {
             "title_ru": next_evolution.title_ru,
