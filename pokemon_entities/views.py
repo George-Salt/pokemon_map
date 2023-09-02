@@ -25,7 +25,7 @@ def add_pokemon(folium_map, lat, lon, image_url=DEFAULT_IMAGE_URL):
 
 
 def show_all_pokemons(request):
-    pokemons_objects = Pokemon.objects.all()
+    pokemons = Pokemon.objects.all()
     active_pokemons_entities = PokemonEntity.objects.all().filter(
         appeared_at__lt=localtime(),
         disappeared_at__gt=localtime()
@@ -40,7 +40,7 @@ def show_all_pokemons(request):
         )
 
     pokemons_on_page = []
-    for pokemon in pokemons_objects:
+    for pokemon in pokemons:
         pokemons_on_page.append({
             'pokemon_id': pokemon.pk,
             'img_url': request.build_absolute_uri(pokemon.image.url),
