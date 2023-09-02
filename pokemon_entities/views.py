@@ -5,7 +5,7 @@ from django.utils.timezone import localtime
 from .models import Pokemon, PokemonEntity
 
 
-MOSCOW_CENTER = [55.751244, 37.618423]
+MOSCOW_CENTER_COORDINATES = [55.751244, 37.618423]
 DEFAULT_IMAGE_URL = (
     "https://vignette.wikia.nocookie.net/pokemon/images/6/6e/%21.png/revision"
     "/latest/fixed-aspect-ratio-down/width/240/height/240?cb=20130525215832"
@@ -31,7 +31,6 @@ def show_all_pokemons(request):
         disappeared_at__gt=local_time
     )
 
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
     for pokemon_entity in active_pokemons_entities:
         add_pokemon(
             folium_map, pokemon_entity.lat,
@@ -48,6 +47,7 @@ def show_all_pokemons(request):
             "title_ru": pokemon.title_ru,
         })
 
+    folium_map = folium.Map(location=MOSCOW_CENTER_COORDINATES, zoom_start=12)
     return render(request, "mainpage.html", context={
         "map": folium_map._repr_html_(),
         "pokemons": pokemons_on_page,
@@ -55,15 +55,15 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    requested_pokemon = get_object_or_404(Pokemon, id=pokemon_id)
+    local_time = localtime()
     requested_pokemon_entities = get_list_or_404(
         PokemonEntity,
-        appeared_at__lt=localtime(),
-        disappeared_at__gt=localtime(),
+        appeared_at__lt=local_time,
+        disappeared_at__gt=local_time,
         pokemon=pokemon_id
     )
 
-    folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
+    requested_pokemon = get_object_or_404(Pokemon, id=pokemon_id)
     pokemon_specs = {
         "pokemon_id": requested_pokemon.pk,
         "entities": [],
@@ -82,15 +82,17 @@ def show_pokemon(request, pokemon_id):
                 requested_pokemon.previous_evolutions.image.url
             )
         }
+
     next_evolutions = requested_pokemon.next_evolutions.all()
     if next_evolutions:
-        for evolution in next_evolutions:
-            pokemon_specs["next_evolution"] = {
-                "title_ru": evolution.title_ru,
-                "pokemon_id": evolution.pk,
-                "img_url": request.build_absolute_uri(evolution.image.url)
-            }
+        evolution = next_evolutions[0]
+        pokemon_specs["next_evolution"] = {
+            "title_ru": evolution.title_ru,
+            "pokemon_id": evolution.pk,
+            "img_url": request.build_absolute_uri(evolution.image.url)
+        }
 
+    folium_map = folium.Map(location=MOSCOW_CENTER_COORDINATES, zoom_start=12)
     for entity in requested_pokemon_entities:
         pokemon_entity = {
             "lat": entity.lat,
